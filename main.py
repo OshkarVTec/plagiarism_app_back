@@ -1,6 +1,6 @@
-from typing import Union
+from typing import List, Union
 
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 
 app = FastAPI()
 
@@ -10,6 +10,13 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.post("/upload-files/")
+async def upload_files(files: List[UploadFile] = File(...)):
+    results = []
+    for file in files:
+        content = await file.read()
+        # Process the file content as needed
+
+        # Example return
+        results.append({"filename": file.filename, "size": len(content)})
+    return {"files": results}
