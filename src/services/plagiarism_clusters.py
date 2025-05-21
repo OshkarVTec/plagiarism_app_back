@@ -268,7 +268,7 @@ def group_clusters(file_map, line_ranges, labels):
 def plagiarism_detection_clusters(
     root=None,
     paths=None,
-    min_nodes=30,
+    min_nodes=15,
     window=1,
     stride=1,
     radius=0.05,
