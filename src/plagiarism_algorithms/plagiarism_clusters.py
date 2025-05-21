@@ -269,8 +269,8 @@ def plagiarism_detection_clusters(
     root=None,
     paths=None,
     min_nodes=15,
-    window=1,
-    stride=1,
+    window=3,
+    stride=3,
     radius=0.05,
     length_tol=0.2,
 ):
