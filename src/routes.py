@@ -1,7 +1,7 @@
 import os
 from typing import Any, Dict, List
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from services import get_clusters, get_file_content
+from services import get_clusters, get_file_content, save_files
 
 app = FastAPI()
 
@@ -16,15 +16,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
     description="Upload files and get plagiarism detection results.",
 )
 async def detect_plagiarism(files: List[UploadFile] = File(...)):
-    file_paths = []
-    for file in files:
-        filename = file.filename or "unnamed_file"
-        file_location = os.path.join(UPLOAD_DIR, filename)
-        with open(file_location, "wb") as f:
-            content = await file.read()
-            f.write(content)
-        file_paths.append(file_location)
-
+    await save_files(files)
     try:
         return get_clusters(UPLOAD_DIR)
     except Exception as e:

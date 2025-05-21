@@ -1,7 +1,19 @@
+import os
 from plagiarism_algorithms.plagiarism_clusters import plagiarism_detection_clusters
 from plagiarism_algorithms.plagiarism_difflib import detect_type_from_files
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
+
+
+async def save_files(files, upload_dir: str = "uploaded_files"):
+    file_paths = []
+    for file in files:
+        filename = file.filename or "unnamed_file"
+        file_location = os.path.join(upload_dir, filename)
+        content = await file.read()
+        with open(file_location, "wb") as f:
+            f.write(content)
+        file_paths.append(file_location)
 
 
 def get_clusters(root_dir: str):
