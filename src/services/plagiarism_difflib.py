@@ -1,5 +1,5 @@
 import difflib
-from tokenizer import tokenize_code, normalize_code
+from .tokenizer import tokenize_code, normalize_code
 import ast
 
 
