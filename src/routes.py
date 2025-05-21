@@ -1,7 +1,10 @@
 import os
-from typing import List
+from typing import Any, Dict, List
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from pydantic import BaseModel
+from services.plagiarism_clusters import plagiarism_detection_clusters
+from services.plagiarism_difflib import detect_type_from_files
+from fastapi.encoders import jsonable_encoder
 
 app = FastAPI()
 
@@ -9,15 +12,9 @@ UPLOAD_DIR = "uploaded_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-class PlagiarismResult(BaseModel):
-    filename: str
-    plagiarism_score: float
-    details: str
-
-
 @app.post(
     "/detect-plagiarism/",
-    response_model=List[PlagiarismResult],
+    response_model=Dict[str, Any],
     summary="Detect plagiarism in uploaded files",
     description="Upload files and get plagiarism detection results.",
 )
@@ -32,19 +29,24 @@ async def detect_plagiarism(files: List[UploadFile] = File(...)):
         file_paths.append(file_location)
 
     try:
-        # Aquí llamas a tu función de detección de plagio
-        # Ejemplo: results = detect_plagiarism_from_paths(file_paths)
-        # Debes implementar detect_plagiarism_from_paths
-        results = []
-        for path in file_paths:
-            # Simulación de resultado
-            results.append(
-                {
-                    "filename": os.path.basename(path),
-                    "plagiarism_score": 0.5,  # Reemplaza con tu lógica
-                    "details": "50% similar to another file",
-                }
-            )
-        return results
+        clustering_results = plagiarism_detection_clusters(UPLOAD_DIR)
+        return jsonable_encoder(clustering_results)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get(
+    "/files/{filename}",
+    summary="Retrieve uploaded file content as text",
+    description="Return the content of a previously uploaded file as plain text.",
+)
+async def get_uploaded_file(filename: str):
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return {"filename": filename, "content": content}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
