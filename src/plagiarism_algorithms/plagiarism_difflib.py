@@ -1,5 +1,5 @@
 import difflib
-from .tokenizer import tokenize_code, normalize_code
+from .tokenizer import safe_tokenize_code, normalize_code
 import ast
 
 
@@ -25,8 +25,8 @@ def detect_clone_type(code1, code2):
         return 1
 
     # Tokenize the code
-    tokenized_code1 = tokenize_code(code1)
-    tokenized_code2 = tokenize_code(code2)
+    tokenized_code1 = safe_tokenize_code(code1)
+    tokenized_code2 = safe_tokenize_code(code2)
 
     # Type-2: Structurally identical but differ in identifiers, literals, or function names
     if tokenized_code1 == tokenized_code2:
@@ -40,15 +40,6 @@ def detect_clone_type(code1, code2):
     # Type-3: Near-miss copies with small modifications (e.g., added/removed/changed statements)
     if similarity > 0.5:  # Lower threshold for near-miss similarity
         return 3
-
-    # Type-4: Semantically similar but structurally different
-    try:
-        tree1 = ast.parse(code1)
-        tree2 = ast.parse(code2)
-        if ast.dump(tree1) == ast.dump(tree2):
-            return 4
-    except SyntaxError:
-        pass  # Handle invalid code gracefully
 
     return "No Significant Similarity"
 
