@@ -16,6 +16,7 @@ from sklearn.neighbors import NearestNeighbors
 from scipy.sparse.csgraph import connected_components
 from scipy.sparse import coo_matrix
 import json
+import sys
 
 
 def collect_py_files(root_dir):
@@ -227,11 +228,6 @@ def write_merge_clusters(clusters):
         processed_clusters.add(lab)
         merged_cluster_index += 1
 
-    # Save the merged clusters to a JSON file
-    with open("merged_clusters.json", "w", encoding="utf-8") as json_file:
-        json.dump(merged_clusters, json_file, indent=4, ensure_ascii=False)
-
-    print("Merged clusters saved to merged_clusters.json")
     return merged_clusters
 
 
@@ -269,7 +265,52 @@ def group_clusters(file_map, line_ranges, labels):
     return clusters
 
 
-def main():
+def plagiarism_detection_clusters(
+    root=None,
+    paths=None,
+    min_nodes=30,
+    window=1,
+    stride=1,
+    radius=0.05,
+    length_tol=0.2,
+):
+    """
+    Main entry point for the plagiarism cluster detector.
+
+    Args:
+        root (str): Root directory to search for .py files.
+        paths (list): List of file or directory paths.
+        min_nodes (int): Minimum AST nodes per fragment.
+        window (int): Window size for WVG.
+        stride (int): Stride for WVG.
+        radius (float): Cosine distance threshold for LSH.
+        length_tol (float): Tolerance for length similarity.
+    Returns:
+        dict: Merged clusters.
+    """
+    files = collect_py_files(root) if root else []
+    if paths:
+        for p in paths:
+            if os.path.isdir(p):
+                files.extend(collect_py_files(p))
+            elif p.endswith(".py"):
+                files.append(p)
+
+    file_map, line_ranges, clones, labels = detect_clones(
+        files, min_nodes, window, stride, radius, length_tol
+    )
+
+    clusters = group_clusters(file_map, line_ranges, labels)
+    merged_clusters = write_merge_clusters(clusters)
+
+    if not clones:
+        return merged_clusters
+
+    return merged_clusters
+
+
+if __name__ == "__main__":
+
     parser = argparse.ArgumentParser(
         description="Detector de clones AST+LSH con clustering de pares exactos"
     )
@@ -282,32 +323,12 @@ def main():
     parser.add_argument("--length-tol", type=float, default=0.2)
     args = parser.parse_args()
 
-    files = collect_py_files(args.root) if args.root else []
-    for p in args.paths:
-        if os.path.isdir(p):
-            files.extend(collect_py_files(p))
-        elif p.endswith(".py"):
-            files.append(p)
-
-    file_map, line_ranges, clones, labels = detect_clones(
-        files, args.min_nodes, args.window, args.stride, args.radius, args.length_tol
+    plagiarism_detection_clusters(
+        root=args.root,
+        paths=args.paths,
+        min_nodes=args.min_nodes,
+        window=args.window,
+        stride=args.stride,
+        radius=args.radius,
+        length_tol=args.length_tol,
     )
-
-    clusters = group_clusters(file_map, line_ranges, labels)
-    write_clustering_report(clusters, labels)
-    write_merge_clusters(clusters)
-
-    if not clones:
-        print("No se encontraron fragmentos similares.")
-        return
-
-    print("\nFragmentos similares detectados:\n")
-    for i, j in clones:
-        fi, fj = file_map[i], file_map[j]
-        si, ei = line_ranges[i]
-        sj, ej = line_ranges[j]
-        print(f"{fi} líneas {si}–{ei} ≈ {fj} líneas {sj}–{ej}\n")
-
-
-if __name__ == "__main__":
-    main()
