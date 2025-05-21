@@ -1,10 +1,7 @@
 import os
 from typing import Any, Dict, List
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from pydantic import BaseModel
-from services.plagiarism_clusters import plagiarism_detection_clusters
-from services.plagiarism_difflib import detect_type_from_files
-from fastapi.encoders import jsonable_encoder
+from services import get_clusters, get_file_content
 
 app = FastAPI()
 
@@ -29,8 +26,7 @@ async def detect_plagiarism(files: List[UploadFile] = File(...)):
         file_paths.append(file_location)
 
     try:
-        clustering_results = plagiarism_detection_clusters(UPLOAD_DIR)
-        return jsonable_encoder(clustering_results)
+        return get_clusters(UPLOAD_DIR)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -45,8 +41,6 @@ async def get_uploaded_file(filename: str):
     if not os.path.isfile(file_path):
         raise HTTPException(status_code=404, detail="File not found")
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-        return {"filename": filename, "content": content}
+        return get_file_content(file_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
