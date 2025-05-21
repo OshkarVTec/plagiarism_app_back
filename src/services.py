@@ -6,6 +6,13 @@ from fastapi import HTTPException
 
 
 async def save_files(files, upload_dir: str = "uploaded_files"):
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
+    else:
+        for filename in os.listdir(upload_dir):
+            file_path = os.path.join(upload_dir, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
     file_paths = []
     for file in files:
         filename = file.filename or "unnamed_file"
