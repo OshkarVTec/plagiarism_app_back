@@ -33,6 +33,8 @@ def get_clusters(root_dir: str):
             for j in range(i + 1, len(files_and_ranges)):
                 file1, start1, end1 = files_and_ranges[i]
                 file2, start2, end2 = files_and_ranges[j]
+                if file1 == file2:
+                    continue  # Skip same file comparisons
                 try:
                     clone_type = detect_type_from_files(
                         file1, start1, end1, file2, start2, end2
