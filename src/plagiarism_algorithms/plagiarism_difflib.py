@@ -38,7 +38,7 @@ def detect_clone_type(code1, code2):
     print(f"Similarity: {similarity}")
 
     # Type-3: Near-miss copies with small modifications (e.g., added/removed/changed statements)
-    if similarity > 0.5:  # Lower threshold for near-miss similarity
+    if similarity > 0.4:  # Lower threshold for near-miss similarity
         return 3
 
     return "No Significant Similarity"
