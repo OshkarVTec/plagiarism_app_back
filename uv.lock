@@ -387,6 +387,7 @@ dependencies = [
     { name = "python-multipart" },
     { name = "scikit-learn" },
     { name = "scipy" },
+    { name = "uvicorn" },
 ]
 
 [package.metadata]
@@ -396,6 +397,7 @@ requires-dist = [
     { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "scikit-learn", specifier = ">=1.6.1" },
     { name = "scipy", specifier = ">=1.15.3" },
+    { name = "uvicorn", specifier = ">=0.34.2" },
 ]
 
 [[package]]

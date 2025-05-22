@@ -232,7 +232,6 @@ def write_merge_clusters(clusters):
 
 
 def write_clustering_report(clusters, labels, filename="output.txt"):
-
     with open(filename, "w", encoding="utf-8") as out:
         out.write(f"Clustering de {len(labels)} fragmentos (pares exactos)\n\n")
         for lab, members in sorted(clusters.items()):
@@ -299,8 +298,8 @@ def plagiarism_detection_clusters(
     file_map, line_ranges, clones, labels = detect_clones(
         files, min_nodes, window, stride, radius, length_tol
     )
-
     clusters = group_clusters(file_map, line_ranges, labels)
+    write_clustering_report(clusters, labels)
     merged_clusters = write_merge_clusters(clusters)
 
     if not clones:
