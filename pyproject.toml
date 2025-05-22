@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "fastapi[standard]>=0.115.12",
+    "fastapi[all,standard]>=0.115.12",
     "numpy>=2.2.6",
     "python-multipart>=0.0.20",
     "scikit-learn>=1.6.1",
