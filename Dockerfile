@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:3.10
 COPY --from=ghcr.io/astral-sh/uv:0.7.7 /uv /uvx /bin/
 
 WORKDIR /app
@@ -11,4 +11,4 @@ RUN uv sync
 # Copy the project into the image
 ADD . /app
 
-CMD ["uv", "run", "uvicorn", "src.routes:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "main:app","--reload", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "src"]

@@ -1,27 +1,7 @@
-import os
 from plagiarism_algorithms.plagiarism_clusters import plagiarism_detection_clusters
 from plagiarism_algorithms.plagiarism_difflib import detect_type_from_files
 from fastapi.encoders import jsonable_encoder
-from fastapi import HTTPException
-
-
-async def save_files(files, upload_dir: str = "uploaded_files"):
-    if not os.path.exists(upload_dir):
-        os.makedirs(upload_dir)
-    else:
-        for filename in os.listdir(upload_dir):
-            file_path = os.path.join(upload_dir, filename)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-    file_paths = []
-    for file in files:
-        filename = file.filename or "unnamed_file"
-        file_location = os.path.join(upload_dir, filename)
-        content = await file.read()
-        with open(file_location, "wb") as f:
-            f.write(content)
-        file_paths.append(file_location)
-
+import os
 
 def get_clusters(root_dir: str):
     clustering_results = plagiarism_detection_clusters(root_dir)
@@ -61,9 +41,19 @@ def get_clusters(root_dir: str):
 
     return jsonable_encoder(clusters_with_types)
 
-
-def get_file_content(file_path: str):
-    with open(file_path, "r", encoding="utf-8") as f:
-        content = f.read()
-    filename = file_path.split("/")[-1]
-    return {"filename": filename, "content": content}
+async def save_files(files, upload_dir: str = "uploaded_files"):
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
+    else:
+        for filename in os.listdir(upload_dir):
+            file_path = os.path.join(upload_dir, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+    file_paths = []
+    for file in files:
+        filename = file.filename or "unnamed_file"
+        file_location = os.path.join(upload_dir, filename)
+        content = await file.read()
+        with open(file_location, "wb") as f:
+            f.write(content)
+        file_paths.append(file_location)
