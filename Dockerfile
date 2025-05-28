@@ -11,4 +11,4 @@ RUN uv sync
 # Copy the project into the image
 ADD . /app
 
-CMD ["uv", "run", "uvicorn", "main:app","--reload", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "src"]
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "src"]
