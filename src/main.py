@@ -14,10 +14,10 @@ app = FastAPI(
     docs_url=settings.docs_url,
     openapi_url="/openapi.json",
     redoc_url=None,
-    swagger_ui_parameters={"docExpansion":"none","persistAuthorization":True},
+    swagger_ui_parameters={"docExpansion": "none", "persistAuthorization": True},
 )
-app.include_router(plagiarism.router, prefix="/plagiarism", tags=["Plagiarism"])
-app.include_router(files.router,      prefix="/files",      tags=["Files"])
+app.include_router(plagiarism.router, tags=["Plagiarism"])
+app.include_router(files.router, tags=["Files"])
 
 # crea carpeta si no existe
 os.makedirs(settings.upload_dir, exist_ok=True)
