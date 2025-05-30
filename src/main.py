@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from core.config import settings
 from routers import plagiarism, files
 from core.openapi import custom_openapi
+from core.middleware import setup_cors_middleware
 
 app = FastAPI(
     title=settings.title,
@@ -16,6 +17,7 @@ app = FastAPI(
     redoc_url=None,
     swagger_ui_parameters={"docExpansion": "none", "persistAuthorization": True},
 )
+setup_cors_middleware(app)
 app.include_router(plagiarism.router, tags=["Plagiarism"])
 app.include_router(files.router, tags=["Files"])
 
