@@ -41,7 +41,7 @@ def detect_clone_type(code1, code2):
     if similarity > 0.4:  # Lower threshold for near-miss similarity
         return 3
 
-    return "No Significant Similarity"
+    return -1
 
 
 def detect_type_from_files(file1, start1, end1, file2, start2, end2):
