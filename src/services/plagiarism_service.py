@@ -5,41 +5,36 @@ import os
 
 def get_clusters(root_dir: str):
     clustering_results = plagiarism_detection_clusters(root_dir)
+    clusters_with_pairs = {}
 
-    # Detect plagiarism type for every possible pair inside each cluster
-    clusters_with_types = {}
     for cluster_id, members in clustering_results.items():
+        files = list(members.keys())
         pairs = []
-        # members: {filename: [(start, end), ...], ...}
-        files_and_ranges = []
-        for filename, intervals in members.items():
-            for start, end in intervals:
-                files_and_ranges.append((filename, start, end))
-        # Generate all unique pairs
-        for i in range(len(files_and_ranges)):
-            for j in range(i + 1, len(files_and_ranges)):
-                file1, start1, end1 = files_and_ranges[i]
-                file2, start2, end2 = files_and_ranges[j]
-                if file1 == file2:
-                    continue  # Skip same file comparisons
-                try:
-                    clone_type = detect_type_from_files(
-                        file1, start1, end1, file2, start2, end2
-                    )
-                except Exception as e:
-                    clone_type = f"Error: {str(e)}"
+        # Comparar todos los archivos entre sí (uno contra uno)
+        for i in range(len(files)):
+            for j in range(i + 1, len(files)):
+                file1 = files[i]
+                file2 = files[j]
+                # Comparar archivos completos: líneas 1 hasta EOF
+                with open(file1, "r", encoding="utf-8") as f1:
+                    lines1 = f1.readlines()
+                with open(file2, "r", encoding="utf-8") as f2:
+                    lines2 = f2.readlines()
+                start1, end1 = 1, len(lines1)
+                start2, end2 = 1, len(lines2)
+                clone_type = detect_type_from_files(
+                    file1, start1, end1, file2, start2, end2
+                )
                 pairs.append(
                     {
                         "file1": file1,
-                        "lines1": [start1, end1],
                         "file2": file2,
-                        "lines2": [start2, end2],
                         "clone_type": clone_type,
                     }
                 )
-        clusters_with_types[cluster_id] = {"members": members, "pairs": pairs}
+        clusters_with_pairs[cluster_id] = {"members": members, "file_pairs": pairs}
 
-    return jsonable_encoder(clusters_with_types)
+    return jsonable_encoder(clusters_with_pairs)
 
 async def save_files(files, upload_dir: str = "uploaded_files"):
     if not os.path.exists(upload_dir):
